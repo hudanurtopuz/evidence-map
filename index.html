@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perinatal Sanat Temelli Müdahaleler: Kanıt Haritası (Evidence & Gap Map)</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --rct: #2563eb;
+      --quasi: #0d9488;
+      --qual: #d97706;
+      --mixed-2: #4f46e5;
+      --mixed-3: #7c3aed;
+      --modal-bg: rgba(15, 23, 42, 0.65);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text-main); padding: 32px 16px; line-height: 1.5; }
+    .container { max-width: 1250px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 24px; }
+    
+    header { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+    h1 { font-size: 1.45rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
+    p.desc { font-size: 0.92rem; color: var(--text-muted); }
+
+    /* Lejant */
+    .legend-bar { 
+      display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; 
+      margin-bottom: 20px; padding: 12px 16px; background: #f1f5f9; border-radius: 8px; font-size: 0.85rem; 
+      border: 1px solid #e2e8f0;
+    }
+    .legend-group { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 13px; height: 13px; border-radius: 50%; display: inline-block; }
+    .dot.rct { background-color: var(--rct); }
+    .dot.quasi { background-color: var(--quasi); }
+    .dot.qual { background-color: var(--qual); }
+    .dot.mixed2 { background-color: var(--mixed-2); }
+    .dot.mixed3 { background-color: var(--mixed-3); }
+
+    /* Matris Tablosu */
+    .matrix-wrapper { overflow-x: auto; margin-bottom: 8px; }
+    table.egm-table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    th, td { border: 1px solid var(--border); text-align: center; vertical-align: middle; position: relative; }
+    th { background: #f8fafc; font-size: 0.86rem; font-weight: 700; padding: 14px 10px; color: #1e293b; line-height: 1.3; }
+    th.row-header { text-align: left; padding-left: 14px; width: 230px; background: #ffffff; }
+    td.cell { height: 105px; width: 160px; background: #ffffff; transition: background 0.2s; }
+    td.cell:hover { background: #f1f5f9; }
+
+    /* Baloncuklar */
+    .bubble {
+      border-radius: 50%;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+      transition: transform 0.2s, box-shadow 0.2s;
+      user-select: none;
+      padding: 4px;
+      text-align: center;
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+    }
+    .bubble:hover {
+      transform: scale(1.12);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.28);
+    }
+    .bubble-count { font-size: 1.1rem; line-height: 1; }
+
+    .b-size-1 { width: 44px; height: 44px; }
+    .b-size-1 .bubble-count { font-size: 0.95rem; }
+    .b-size-2 { width: 58px; height: 58px; }
+    .b-size-3 { width: 72px; height: 72px; }
+
+    .b-rct { background-color: var(--rct); }
+    .b-quasi { background-color: var(--quasi); }
+    .b-qual { background-color: var(--qual); }
+    .b-mixed-2 { background-color: var(--mixed-2); }
+    .b-mixed-3 { background-color: var(--mixed-3); }
+
+    /* Pop-up Modal */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--modal-bg);
+      display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px;
+      backdrop-filter: blur(2px);
+    }
+    .modal-card {
+      background: #ffffff; width: 100%; max-width: 680px; max-height: 85vh;
+      border-radius: 12px; overflow-y: auto; padding: 24px; box-shadow: 0 12px 36px rgba(0,0,0,0.25);
+    }
+    .modal-header { 
+      display: flex; justify-content: space-between; align-items: flex-start; 
+      margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px; 
+    }
+    .modal-title { font-size: 1.15rem; font-weight: 700; color: var(--text-main); }
+    .modal-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+    .close-btn { 
+      background: none; border: none; font-size: 1.6rem; line-height: 1; 
+      cursor: pointer; color: var(--text-muted); padding: 0 4px; 
+    }
+    .close-btn:hover { color: var(--text-main); }
+
+    .study-item { 
+      padding: 14px 16px; border: 1px solid var(--border); border-radius: 8px; 
+      margin-bottom: 14px; background: #f8fafc; 
+    }
+    .study-item:last-child { margin-bottom: 0; }
+    .study-title { font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; line-height: 1.35; }
+    .study-meta { 
+      font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px; 
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center; 
+    }
+    .badge { padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.72rem; }
+    .badge-rct { background: #dbeafe; color: #1e40af; }
+    .badge-quasi { background: #ccfbf1; color: #0f766e; }
+    .badge-qual { background: #fef3c7; color: #92400e; }
+    .study-row { font-size: 0.84rem; color: #334155; margin-bottom: 6px; line-height: 1.45; }
+    .study-link { display: inline-block; margin-top: 6px; font-size: 0.82rem; color: var(--rct); text-decoration: none; font-weight: 600; }
+    .study-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Perinatal Dönemde Sanat Temelli Müdahaleler: Kanıt ve Boşluk Haritası (EGM)</h1>
+    <p class="desc">Müdahale modelleri ile hedeflenen sonuç alanlarının kesişim matrisi. Baloncuk boyutu çalışma sayısını ($N$), rengi araştırma desenini gösterir. Ayrıntılar için baloncuklara tıklayınız.</p>
+  </header>
+
+  <div class="legend-bar">
+    <div class="legend-group">
+      <span style="font-weight:700;">Metodolojik Tasarım:</span>
+      <div class="legend-item"><span class="dot rct"></span> Randomize Kontrollü (RKÇ)</div>
+      <div class="legend-item"><span class="dot quasi"></span> Yarı Deneysel</div>
+      <div class="legend-item"><span class="dot qual"></span> Nitel Analiz</div>
+      <div class="legend-item"><span class="dot mixed2"></span> Karma (RKÇ + Yarı Deneysel)</div>
+      <div class="legend-item"><span class="dot mixed3"></span> Karma (RKÇ + Nitel + Yarı Den.)</div>
+    </div>
+  </div>
+
+  <div class="matrix-wrapper">
+    <table class="egm-table">
+      <thead>
+        <tr>
+          <th class="row-header">Müdahale Türü</th>
+          <th>Doğum Korkusu<br>(FOC / Tokofobi)</th>
+          <th>Psikolojik Distres<br>& Stres</th>
+          <th>Anksiyete &<br>Depresyon</th>
+          <th>Anne-Fetüs<br>Bağlanması</th>
+          <th>Obstetrik / Doğum<br>Sonuçları</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-header">Yönlendirilmiş Resim/Çizim</td>
+          <td class="cell" id="c-draw-foc"></td>
+          <td class="cell" id="c-draw-distress"></td>
+          <td class="cell" id="c-draw-anx"></td>
+          <td class="cell" id="c-draw-attach"></td>
+          <td class="cell" id="c-draw-obs"></td>
+        </tr>
+        <tr>
+          <td class="row-header">Mandala Boyama/Çizimi</td>
+          <td class="cell" id="c-man-foc"></td>
+          <td class="cell" id="c-man-distress"></td>
+          <td class="cell" id="c-man-anx"></td>
+          <td class="cell" id="c-man-attach"></td>
+          <td class="cell" id="c-man-obs"></td>
+        </tr>
+        <tr>
+          <td class="row-header">Çok Bileşenli Ekspresif Sanat</td>
+          <td class="cell" id="c-multi-foc"></td>
+          <td class="cell" id="c-multi-distress"></td>
+          <td class="cell" id="c-multi-anx"></td>
+          <td class="cell" id="c-multi-attach"></td>
+          <td class="cell" id="c-multi-obs"></td>
+        </tr>
+        <tr>
+          <td class="row-header">Müzik, Çizim ve Anlatı (MDN)</td>
+          <td class="cell" id="c-mdn-foc"></td>
+          <td class="cell" id="c-mdn-distress"></td>
+          <td class="cell" id="c-mdn-anx"></td>
+          <td class="cell" id="c-mdn-attach"></td>
+          <td class="cell" id="c-mdn-obs"></td>
+        </tr>
+        <tr>
+          <td class="row-header">Mindfulness Temelli Sanat (MBAT)</td>
+          <td class="cell" id="c-mbat-foc"></td>
+          <td class="cell" id="c-mbat-distress"></td>
+          <td class="cell" id="c-mbat-anx"></td>
+          <td class="cell" id="c-mbat-attach"></td>
+          <td class="cell" id="c-mbat-obs"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Pop-up Ekranı -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="mTitle">Kesişim Başlığı</div>
+        <div class="modal-subtitle" id="mSubtitle">0 Çalışma Listelendi</div>
+      </div>
+      <button class="close-btn" onclick="closeModal()">&times;</button>
+    </div>
+    <div id="mStudiesContainer"></div>
+  </div>
+</div>
+
+<script>
+  const studiesData = {
+    wahlbeck2020: {
+      title: "Art Therapy and Counseling for Fear of Childbirth: A Randomized Controlled Trial",
+      authors: "Wahlbeck H, Kvist LJ, Landgren K (2020)",
+      design: "Randomize Kontrollü Çalışma (RKÇ)",
+      badgeClass: "badge-rct",
+      sample: "N = 82 (39 Sanat+Ebe Danışmanlığı, 43 Tek Başına Danışmanlık)",
+      findings: "W-DEQ ölçeğiyle ölçülen doğum korkusu her iki grupta anlamlı azaldı (p < 0.01); ancak gruplar arası fark istatistiksel olarak anlamsızdı (p = 0.56). Normal doğum oranları sanat grubunda daha yüksek eğilim gösterse de sınırda kaldı (p = 0.06).",
+      link: "https://doi.org/10.1080/07421656.2020.1721399"
+    },
+    wahlbeck2018: {
+      title: "Gaining hope and self-confidence - An interview study of women's experience of treatment by art therapy for severe fear of childbirth",
+      authors: "Wahlbeck H, Kvist LJ, Landgren K (2018)",
+      design: "Nitel Fenomenolojik Hermeneotik",
+      badgeClass: "badge-qual",
+      sample: "N = 19 (Doğumdan 3 ay sonra derinlemesine görüşme)",
+      findings: "Resim yapma eylemi korkunun imajlara depozit edilmesini sağladı. Bebekle bağlanma güçlendi ve kadınlar yaklaşan doğuma karşı umut ve özgüven kazandı.",
+      link: "https://doi.org/10.1016/j.wombi.2017.10.008"
+    },
+    govahi2026: {
+      title: "Drawing and Midwife-led Counseling for Reducing Fear of Childbirth and Distress in Late Pregnancy",
+      authors: "Govahi M, Behmanesh F, Bakhtiari A, Kheirkhah F, Chehrazi M (2026)",
+      design: "Yarı Deneysel Çalışma (Ön test - Son test)",
+      badgeClass: "badge-quasi",
+      sample: "N = 100 (50 Çizim+Ebe Danışmanlığı, 50 Tek Başına Danışmanlık)",
+      findings: "Doğum korkusu (Hartmann CAQ) ve prenatal distres (NuPDQ) her iki grupta anlamlı düştü (P < 0.001); ancak gruplar arası fark istatistiksel olarak anlamsızdı. Doğum şekli ve obstetrik sonuçlarda fark görülmedi.",
+      link: "https://doi.org/10.2174/0115734048370094250630063133"
+    },
+    sharifpour2023: {
+      title: "Comparing the Effectiveness of Art Therapy Based on Painting With Childbirth Preparation Classes on Psychological Distress of Pregnant Women",
+      authors: "Sharifpour L, Abdi Salaleh R, Kouzehgran R, Meftahi A, Shapari B (2023)",
+      design: "Yarı Deneysel Çalışma (3 Kollu Tasarım)",
+      badgeClass: "badge-quasi",
+      sample: "N = 51 (17 Resim Terapisi, 17 Doğuma Hazırlık Sınıfı, 17 Kontrol)",
+      findings: "Kessler-10 psikolojik distres puanı resim grubunda 23.47'den 8.00'e geriledi (P < 0.001, eta^2 = 0.63). Resim terapisinin doğuma hazırlık sınıflarından anlamlı derecede daha etkili olduğu saptandı.",
+      link: "https://doi.org/10.32598/CJHR.8.2.447.2"
+    },
+    topcu2025: {
+      title: "Mandala as a New Intervention for Reducing Fear of Childbirth: A Randomized Controlled Trial",
+      authors: "Topcu T, Bayri Bingöl F (2025)",
+      design: "Randomize Kontrollü Çalışma (RKÇ)",
+      badgeClass: "badge-rct",
+      sample: "N = 100 (49 Mandala+Antenatal Eğitim, 51 Rutin Eğitim)",
+      findings: "Antenatal eğitime eklenen mandala boyama, doğum öncesi W-DEQ-A (P = 0.018) ve doğum sırasındaki W-DEQ-B (P = 0.030) doğum korkusunu anlamlı derecede azalttı. Obstetrik sonuçlar benzer çıktı.",
+      link: "https://doi.org/10.1111/jmwh.13722"
+    },
+    sezen2019: {
+      title: "Group art therapy for the management of fear of childbirth",
+      authors: "Sezen C, Ünsalver BÖ (2019)",
+      design: "Randomize Kontrollü Çalışma (RKÇ)",
+      badgeClass: "badge-rct",
+      sample: "N = 30 (15 Çok Bileşenli Sanat Grubu, 15 Psikoeğitim)",
+      findings: "6 oturumluk çok bileşenli sanat terapisi; W-DEQ, Beck Anksiyete ve Beck Depresyon puanlarını psikoeğitime göre anlamlı düzeyde düşürdü (p < 0.001). Sanat grubunda 12 kadın normal doğum yaparken, psikoeğitim grubunda 10 kadın sezaryen oldu.",
+      link: "https://doi.org/10.1016/j.aip.2018.11.007"
+    },
+    chetu2015: {
+      title: "The Effects of Art-Therapy Techniques on Prenatal Maternal-Fetal Attachment",
+      authors: "Chetu CV (2015)",
+      design: "Yarı Deneysel Çalışma",
+      badgeClass: "badge-quasi",
+      sample: "N = 16 (8 Sanat Terapisi, 8 Kontrol)",
+      findings: "PAI ölçeğiyle anne-fetüs bağlanmasında deney grubu lehine istatistiksel olarak anlamlı artış elde edildi (p < 0.05). Çamur/hamur modelleme ve kolaj mandalalar zihinsel temsilleri güçlendirdi.",
+      link: "https://sper.ro/jep"
+    },
+    anolak2023: {
+      title: "Creative arts intervention in support of women experiencing a high-risk pregnancy: A qualitative descriptive thematic analysis",
+      authors: "Anolak H, Lau F, Davis D, Browne J, Watt B (2023)",
+      design: "Nitel Tanımlayıcı Tematik Analiz",
+      badgeClass: "badge-qual",
+      sample: "N = 12 Yatan Yüksek Riskli Gebe",
+      findings: "Müzik eşliğinde çizim ve anlatı (MDN); yatan gebelerin duygularını dışsallaştırmasını, hastane stresinden pozitif dikkat dağıtma yoluyla uzaklaşmasını ve akran desteği geliştirmesini sağladı.",
+      link: "https://doi.org/10.1016/j.srhc.2023.100830"
+    },
+    jalambadani2020: {
+      title: "Examining the effect of mindfulness-based art therapy (MBAT) on stress and lifestyle of Iranian pregnant women",
+      authors: "Jalambadani Z, Borji A, Bakaeian M (2020)",
+      design: "Yarı Deneysel Çalışma",
+      badgeClass: "badge-quasi",
+      sample: "N = 84 (42 MBAT Grubu, 42 Bekleme Listesi)",
+      findings: "10 oturumluk MBAT müdahalesi, HPLP-II ölçeğiyle ölçülen stres yönetimi alt boyutunda ve tüm yaşam tarzı boyutlarında bekleme grubuna kıyasla anlamlı iyileşme sağladı (p < 0.05).",
+      link: "https://doi.org/10.1080/01443615.2019.1652889"
+    }
+  };
+
+  const matrixCells = [
+    { id: "c-draw-foc", studies: ["wahlbeck2020", "wahlbeck2018", "govahi2026"], row: "Yönlendirilmiş Resim/Çizim", col: "Doğum Korkusu (FOC)", count: 3, cls: "b-mixed-3" },
+    { id: "c-draw-distress", studies: ["govahi2026", "sharifpour2023"], row: "Yönlendirilmiş Resim/Çizim", col: "Psikolojik Distres & Stres", count: 2, cls: "b-quasi" },
+    { id: "c-draw-attach", studies: ["wahlbeck2018"], row: "Yönlendirilmiş Resim/Çizim", col: "Anne-Fetüs Bağlanması", count: 1, cls: "b-qual" },
+    { id: "c-draw-obs", studies: ["wahlbeck2020", "govahi2026"], row: "Yönlendirilmiş Resim/Çizim", col: "Obstetrik / Doğum Sonuçları", count: 2, cls: "b-mixed-2" },
+
+    { id: "c-man-foc", studies: ["topcu2025"], row: "Mandala Boyama/Çizimi", col: "Doğum Korkusu (FOC)", count: 1, cls: "b-rct" },
+    { id: "c-man-obs", studies: ["topcu2025"], row: "Mandala Boyama/Çizimi", col: "Obstetrik / Doğum Sonuçları", count: 1, cls: "b-rct" },
+
+    { id: "c-multi-foc", studies: ["sezen2019"], row: "Çok Bileşenli Ekspresif Sanat", col: "Doğum Korkusu (FOC)", count: 1, cls: "b-rct" },
+    { id: "c-multi-anx", studies: ["sezen2019"], row: "Çok Bileşenli Ekspresif Sanat", col: "Anksiyete & Depresyon", count: 1, cls: "b-rct" },
+    { id: "c-multi-attach", studies: ["chetu2015"], row: "Çok Bileşenli Ekspresif Sanat", col: "Anne-Fetüs Bağlanması", count: 1, cls: "b-quasi" },
+    { id: "c-multi-obs", studies: ["sezen2019"], row: "Çok Bileşenli Ekspresif Sanat", col: "Obstetrik / Doğum Sonuçları", count: 1, cls: "b-rct" },
+
+    { id: "c-mdn-distress", studies: ["anolak2023"], row: "Müzik, Çizim ve Anlatı (MDN)", col: "Psikolojik Distres & Stres", count: 1, cls: "b-qual" },
+    { id: "c-mbat-distress", studies: ["jalambadani2020"], row: "Mindfulness Temelli Sanat (MBAT)", col: "Psikolojik Distres & Stres", count: 1, cls: "b-quasi" }
+  ];
+
+  function renderMap() {
+    matrixCells.forEach(cell => {
+      const td = document.getElementById(cell.id);
+      if (!td) return;
+
+      const bubble = document.createElement("div");
+      bubble.className = `bubble b-size-${cell.count} ${cell.cls}`;
+      bubble.innerHTML = `<span class="bubble-count">${cell.count}</span>`;
+
+      bubble.onclick = () => openModal(cell.row, cell.col, cell.studies);
+      td.appendChild(bubble);
+    });
+  }
+
+  function openModal(rowTitle, colTitle, studyKeys) {
+    document.getElementById("mTitle").textContent = `${rowTitle} × ${colTitle}`;
+    document.getElementById("mSubtitle").textContent = `${studyKeys.length} İlgili Akademik Kanıt Kaydı`;
+    
+    const container = document.getElementById("mStudiesContainer");
+    container.innerHTML = "";
+
+    studyKeys.forEach(key => {
+      const s = studiesData[key];
+      const item = document.createElement("div");
+      item.className = "study-item";
+      item.innerHTML = `
+        <div class="study-title">${s.title}</div>
+        <div class="study-meta">
+          <span><strong>Yazarlar:</strong> ${s.authors}</span>
+          <span class="badge ${s.badgeClass}">${s.design}</span>
+        </div>
+        <div class="study-row"><strong>Örneklem:</strong> ${s.sample}</div>
+        <div class="study-row"><strong>Temel Bulgular:</strong> ${s.findings}</div>
+        <a class="study-link" href="${s.link}" target="_blank">Kaynak Makale / DOI &rarr;</a>
+      `;
+      container.appendChild(item);
+    });
+
+    document.getElementById("modalOverlay").style.display = "flex";
+  }
+
+  function closeModal(e) {
+    if (!e || e.target.id === "modalOverlay" || e.target.className === "close-btn") {
+      document.getElementById("modalOverlay").style.display = "none";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", renderMap);
+</script>
+</body>
+</html>
